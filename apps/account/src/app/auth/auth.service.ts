@@ -34,7 +34,11 @@ export class AuthService {
 
     const createNewUser = await this.userRepository.createUser(newUserEntity);
 
-    return createNewUser;
+    return {
+      email: createNewUser.email,
+      displayName: createNewUser.displayName,
+      id: createNewUser._id,
+    };
   }
 
   async validater({ email, password }: LoginDto) {
