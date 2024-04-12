@@ -3,8 +3,7 @@ import { UserRepository } from '../user/repositories/user.repository';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserRole } from '@nestjs-rabbit-mq/interfaces';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from '../dto/login.dto';
-import { RegisterDto } from '../dto/register.dto';
+import { AccountLogin, AccountRegister } from '@nestjs-rabbit-mq/contracs';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +12,11 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async register({ email, password, displayName }: RegisterDto) {
+  async register({
+    email,
+    password,
+    displayName,
+  }: AccountRegister.Request): Promise<AccountRegister.Response> {
     const checkUserEmail = this.userRepository.findUser(email);
     const checkUserDisplayName = this.userRepository.findUser(displayName);
 
@@ -41,7 +44,7 @@ export class AuthService {
     };
   }
 
-  async validater({ email, password }: LoginDto) {
+  async validater({ email, password }: AccountLogin.Request) {
     const user = await this.userRepository.findUser(email);
 
     if (!user) {
@@ -58,7 +61,7 @@ export class AuthService {
     return { id: user._id };
   }
 
-  async login(id: string) {
+  async login(id: string): Promise<AccountLogin.Response> {
     return {
       access_token: await this.jwtService.signAsync(id),
     };

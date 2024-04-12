@@ -1,19 +1,22 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AccountLogin, AccountRegister } from '@nestjs-rabbit-mq/contracs';
+import { RMQRoute, RMQValidate } from 'nestjs-rmq';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
+  @RMQRoute(AccountRegister.topic)
+  @RMQValidate()
   async register(
     @Body() dto: AccountRegister.Request
   ): Promise<AccountRegister.Response> {
     return this.authService.register(dto);
   }
 
-  @Post('login')
+  @RMQRoute(AccountLogin.topic)
+  @RMQValidate()
   async login(
     @Body() dto: AccountLogin.Request
   ): Promise<AccountLogin.Response> {
