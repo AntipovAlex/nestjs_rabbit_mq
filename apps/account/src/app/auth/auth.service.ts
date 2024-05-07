@@ -17,8 +17,10 @@ export class AuthService {
     password,
     displayName,
   }: AccountRegister.Request): Promise<AccountRegister.Response> {
-    const checkUserEmail = this.userRepository.findUser(email);
-    const checkUserDisplayName = this.userRepository.findUser(displayName);
+    const checkUserEmail = await this.userRepository.findUser(email);
+    const checkUserDisplayName = await this.userRepository.findUser(
+      displayName
+    );
 
     if (checkUserEmail) {
       throw new Error('This email has already been take');
@@ -29,8 +31,8 @@ export class AuthService {
     }
 
     const newUserEntity = await new UserEntity({
+      displayName: '',
       email,
-      displayName,
       passwordHash: '',
       role: UserRole.Student,
     }).setPassword(password);
@@ -39,8 +41,8 @@ export class AuthService {
 
     return {
       email: createNewUser.email,
-      displayName: createNewUser.displayName,
-      id: createNewUser._id,
+      displayName: createNewUser?.displayName,
+      id: createNewUser?._id,
     };
   }
 

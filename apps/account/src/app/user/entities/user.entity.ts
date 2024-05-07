@@ -11,7 +11,7 @@ export class UserEntity implements IUser {
   constructor(user: IUser) {
     (this._id = user._id),
       (this.displayName = user.displayName),
-      (this.email = user.displayName),
+      (this.email = user.email),
       (this.passwordHash = user.passwordHash),
       (this.role = user.role);
   }

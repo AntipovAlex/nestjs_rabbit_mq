@@ -13,7 +13,6 @@ export const getRMQConfig = (): IRMQServiceAsyncOptions => ({
         host: configService.get('RQM_HOST') ?? '',
       },
     ],
-    queueName: configService.get('RMQ_QUEUE_NAME'),
     prefetchCount: 32,
     serviceName: 'nestjs-rabbit',
   }),
