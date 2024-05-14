@@ -4,9 +4,9 @@ import { UserId } from '../decorates/user.decorate';
 
 @Controller('user')
 export class AuthController {
-  constructor() {}
-
   @UseGuards(JWTAuthGuard)
   @Post('info')
-  async info(@UserId() userId: string) {}
+  async info(@UserId() userId: string) {
+    return undefined;
+  }
 }

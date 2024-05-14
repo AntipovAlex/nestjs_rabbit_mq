@@ -1,6 +1,7 @@
 import { IUser, UserRole } from '@nestjs-rabbit-mq/interfaces';
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { UserCourseModel, UserCourseSchema } from './userCourse.model';
 
 @Schema()
 export class UserModel extends Document implements IUser {
@@ -20,6 +21,9 @@ export class UserModel extends Document implements IUser {
     default: UserRole.Student,
   })
   role: UserRole;
+
+  @Prop({ type: [UserCourseSchema], _id: false })
+  courses: Types.Array<UserCourseModel>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserModel);

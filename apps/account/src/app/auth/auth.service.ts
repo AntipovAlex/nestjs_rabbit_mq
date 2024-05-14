@@ -65,7 +65,7 @@ export class AuthService {
 
   async login(id: string): Promise<AccountLogin.Response> {
     return {
-      access_token: await this.jwtService.signAsync(id),
+      access_token: await this.jwtService.signAsync({ id }),
     };
   }
 }
