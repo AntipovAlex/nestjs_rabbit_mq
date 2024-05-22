@@ -1,4 +1,9 @@
-import { IUser, IUserCourse, UserRole } from '@nestjs-rabbit-mq/interfaces';
+import {
+  IUser,
+  IUserCourse,
+  PurchaseState,
+  UserRole,
+} from '@nestjs-rabbit-mq/interfaces';
 import { compare, genSalt, hash } from 'bcryptjs';
 
 export class UserEntity implements IUser {
@@ -39,5 +44,27 @@ export class UserEntity implements IUser {
       displayName: this.displayName,
       role: this.role,
     };
+  }
+
+  public addCourse(courseId: string) {
+    const existCourse = this.courses.find((cour) => cour._id === courseId);
+
+    if (existCourse) {
+      throw new Error('You already have this course');
+    }
+    this.courses.push({ courseId, purchaseState: PurchaseState.Started });
+  }
+
+  public deleteCourse(courseId: string) {
+    this.courses.filter((cour) => cour._id !== courseId);
+  }
+
+  public updateCourse(courseId: string, state: PurchaseState) {
+    this.courses.map((cour) => {
+      if (cour._id === courseId) {
+        return (cour.purchaseState = state);
+      }
+      return cour;
+    });
   }
 }
