@@ -1,8 +1,13 @@
 import { Body, Controller } from '@nestjs/common';
 import { UserRepository } from './repositories/user.repository';
-import { AccountProfileUpdate } from '@nestjs-rabbit-mq/contracs';
+import {
+  AccountBuyCourse,
+  AccountCheckPayment,
+  AccountProfileUpdate,
+} from '@nestjs-rabbit-mq/contracs';
 import { RMQRoute, RMQValidate } from 'nestjs-rmq';
 import { UserEntity } from './entities/user.entity';
+import { PurchaseState } from '@nestjs-rabbit-mq/interfaces';
 
 @Controller()
 export class UserCommand {
@@ -26,5 +31,23 @@ export class UserCommand {
     await this.userRepository.updateUser(userEntity);
 
     return { user: userEntity };
+  }
+
+  @RMQRoute(AccountBuyCourse.topic)
+  @RMQValidate()
+  async buyCourse(
+    @Body() { userId, courseId }: AccountBuyCourse.Request,
+    displayName: string
+  ): Promise<AccountBuyCourse.Response> {
+    return { paymentUrl: 'paymentUrl' };
+  }
+
+  @RMQRoute(AccountCheckPayment.topic)
+  @RMQValidate()
+  async checkPayment(
+    @Body() { userId, courseId }: AccountCheckPayment.Request,
+    displayName: string
+  ): Promise<AccountCheckPayment.Response> {
+    return { status: PurchaseState.Purchased };
   }
 }
