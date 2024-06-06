@@ -39,7 +39,10 @@ export class BuyCourseSagaStateStarted extends BuyCourseState {
     return { user: this.saga.user };
   }
 
-  public async checkPayment(): Promise<{ user: UserEntity }> {
+  public async checkPayment(): Promise<{
+    user: UserEntity;
+    status: PaymentStatus;
+  }> {
     throw new Error('You cannot check a payment that has not started');
   }
 }
@@ -57,7 +60,10 @@ export class BuyCourseSagaStateWaitingFromPayment extends BuyCourseState {
     );
   }
 
-  public async checkPayment(): Promise<{ user: UserEntity }> {
+  public async checkPayment(): Promise<{
+    user: UserEntity;
+    status: PaymentStatus;
+  }> {
     const { status } = await this.saga.rmqService.send<
       PaymentCheck.Request,
       PaymentCheck.Response
@@ -68,15 +74,15 @@ export class BuyCourseSagaStateWaitingFromPayment extends BuyCourseState {
 
     if (status === PaymentStatus.Canceled) {
       this.saga.setState(PurchaseState.Canceled, this.saga.courseId);
-      return { user: this.saga.user };
+      return { user: this.saga.user, status: PaymentStatus.Canceled };
     }
 
     if (status !== PaymentStatus.Success) {
-      return { user: this.saga.user };
+      return { user: this.saga.user, status: PaymentStatus.Progress };
     }
 
     this.saga.setState(PurchaseState.Purchased, this.saga.courseId);
-    return { user: this.saga.user };
+    return { user: this.saga.user, status: PaymentStatus.Progress };
   }
 }
 
@@ -89,7 +95,7 @@ export class BuyCourseSagaStatePurchased extends BuyCourseState {
     throw new Error('You cannot cancel for the course that you bought.');
   }
 
-  public checkPayment(): Promise<{ user: UserEntity }> {
+  public checkPayment(): Promise<{ user: UserEntity; status: PaymentStatus }> {
     throw new Error('You cannot check for the course that you bought.');
   }
 }
@@ -104,7 +110,7 @@ export class BuyCourseSagaStateCanceled extends BuyCourseState {
     throw new Error('You cannot cancel for the course that you canceled.');
   }
 
-  public checkPayment(): Promise<{ user: UserEntity }> {
+  public checkPayment(): Promise<{ user: UserEntity; status: PaymentStatus }> {
     throw new Error('You cannot check for the course that you canceled.');
   }
 }

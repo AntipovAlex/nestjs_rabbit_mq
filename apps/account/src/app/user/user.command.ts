@@ -5,13 +5,17 @@ import {
   AccountCheckPayment,
   AccountProfileUpdate,
 } from '@nestjs-rabbit-mq/contracs';
-import { RMQRoute, RMQValidate } from 'nestjs-rmq';
+import { RMQRoute, RMQService, RMQValidate } from 'nestjs-rmq';
 import { UserEntity } from './entities/user.entity';
 import { PurchaseState } from '@nestjs-rabbit-mq/interfaces';
+import { BuyCourseSaga } from './sagas/buy-course.saga';
 
 @Controller()
 export class UserCommand {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly rmqService: RMQService
+  ) {}
 
   @RMQRoute(AccountProfileUpdate.topic)
   @RMQValidate()
@@ -36,18 +40,38 @@ export class UserCommand {
   @RMQRoute(AccountBuyCourse.topic)
   @RMQValidate()
   async buyCourse(
-    @Body() { userId, courseId }: AccountBuyCourse.Request,
-    displayName: string
+    @Body() { userId, courseId }: AccountBuyCourse.Request
   ): Promise<AccountBuyCourse.Response> {
-    return { paymentUrl: 'paymentUrl' };
+    const existUser = await this.userRepository.findUserById(userId);
+
+    if (!existUser) {
+      throw new Error('This user not exist');
+    }
+    const userEntity = new UserEntity(existUser);
+    const saga = new BuyCourseSaga(courseId, userEntity, this.rmqService);
+
+    const { user, paymentLink } = await saga.getState().pay();
+    await this.userRepository.updateUser(user);
+
+    return { paymentLink };
   }
 
   @RMQRoute(AccountCheckPayment.topic)
   @RMQValidate()
   async checkPayment(
-    @Body() { userId, courseId }: AccountCheckPayment.Request,
-    displayName: string
+    @Body() { userId, courseId }: AccountCheckPayment.Request
   ): Promise<AccountCheckPayment.Response> {
-    return { status: PurchaseState.Purchased };
+    const existUser = await this.userRepository.findUserById(userId);
+
+    if (!existUser) {
+      throw new Error('This user not exist');
+    }
+
+    const userEntity = new UserEntity(existUser);
+    const saga = new BuyCourseSaga(courseId, userEntity, this.rmqService);
+    const { user, status } = await saga.getState().checkPayment();
+    await this.userRepository.updateUser(user);
+
+    return { status };
   }
 }
