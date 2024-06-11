@@ -9,7 +9,7 @@ export namespace AccountProfileUpdate {
     id: string;
 
     @IsString()
-    displayName: Pick<IUser, 'displayName'>;
+    user: Pick<IUser, 'displayName'>;
   }
 
   export class Response {

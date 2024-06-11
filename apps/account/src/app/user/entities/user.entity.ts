@@ -1,4 +1,6 @@
+import { AccountChamgedCourse } from '@nestjs-rabbit-mq/contracs';
 import {
+  IEvent,
   IUser,
   IUserCourse,
   PurchaseState,
@@ -13,6 +15,7 @@ export class UserEntity implements IUser {
   passwordHash: string;
   role: UserRole;
   courses?: IUserCourse[];
+  events: IEvent[] = [];
 
   constructor(user: IUser) {
     (this._id = user._id),
@@ -65,6 +68,12 @@ export class UserEntity implements IUser {
       }
       return cour;
     });
+
+    this.events.push({
+      topic: AccountChamgedCourse.topic,
+      data: { courseId, id: this._id, state },
+    });
+
     return this;
   }
 }
