@@ -13,7 +13,6 @@ export enum UserRole {
 }
 
 export interface IUserCourse {
-  _id?: string;
   courseId: string;
   purchaseState: PurchaseState;
 }
