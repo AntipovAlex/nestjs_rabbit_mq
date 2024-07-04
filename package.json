@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
+  "nx": {},
   "private": true,
   "dependencies": {
     "@nestjs/common": "^10.0.2",

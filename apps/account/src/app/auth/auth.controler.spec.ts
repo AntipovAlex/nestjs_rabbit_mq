@@ -32,9 +32,9 @@ describe('AuthControler', () => {
           envFilePath: 'envs/.account.env',
         }),
         RMQModule.forTest({}),
-        MongooseModule.forRootAsync(getMongoConfig()),
         UserModule,
         AuthModule,
+        MongooseModule.forRootAsync(getMongoConfig()),
       ],
     }).compile();
 
@@ -57,7 +57,7 @@ describe('AuthControler', () => {
     const res = await rmqService.triggerRoute<
       AccountLogin.Request,
       AccountLogin.Response
-    >(AccountLogin.topic, authRegister);
+    >(AccountLogin.topic, authLogin);
 
     expect(res.access_token).toBeDefined();
   });
